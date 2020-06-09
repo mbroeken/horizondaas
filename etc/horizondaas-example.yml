@@ -1,0 +1,74 @@
+main:
+        prefix: pamola-horizondaas
+
+log:
+        loglevel: 30
+        logfile: /var/log/horizondaas/horizondaas.log
+
+host:
+        url: url
+        username: username
+        password: password
+        insecure_skip_verify: true
+
+metrics:
+        CIMs:
+                - Desktone_ActiveDirectoryStatus
+                - Desktone_ApplicationServer
+                - Desktone_ApplicationServerStatistics
+                - Desktone_CommonDatabase
+                - Desktone_DatabaseReplicationService
+                - Desktone_DatabaseService
+                - Desktone_HypervisorManagerStatus
+                - Desktone_InstalledProduct
+                - Desktone_NTPService
+                - Desktone_RemoteAccessManagerStatistics
+                - Linux_OperatingSystem
+                - Linux_EthernetPort
+                - Linux_ComputerSystem
+                - CIM_FileSystem
+
+        allowedMetrics:
+                - Desktone_ApplicationServer_SoftwareElementState
+                - Desktone_ApplicationServerStatistics_ThreadCount
+                - Desktone_ApplicationServerStatistics_HeapSize
+                - Desktone_ApplicationServerStatistics_MaxHeapSize
+                - Desktone_CommonDatabase_Status
+                - Desktone_DatabaseService_ActiveConnections
+                - Desktone_DatabaseReplicationService_Role
+                - Desktone_DatabaseReplicationService_SyncStatus
+                - Desktone_DatabaseReplicationService_Status
+                - Desktone_ActiveDirectoryStatus_ResponseTime
+                - Desktone_ActiveDirectoryStatus_CommunicationStatus
+                - Desktone_ActiveDirectoryStatus_OperationalStatus
+                - Desktone_ActiveDirectoryStatus_Status
+                - Desktone_HypervisorManagerStatus_CommunicationStatus
+                - Desktone_HypervisorManagerStatus_OperationalStatus
+                - Desktone_HypervisorManagerStatus_Status
+                - Desktone_NTPService_Started
+                - Desktone_NTPService_SyncState
+                - Desktone_NTPService_Jitter
+                - Desktone_NTPService_OperationalStatus
+                - Desktone_NTPService_StatusDescriptions
+                - Desktone_NTPService_PrimarySource
+                - Linux_OperatingSystem_FreePhysicalMemory
+                - Linux_OperatingSystem_FreeVirtualMemory
+                - Linux_OperatingSystem_HealthState
+                - Linux_OperatingSystem_OperationalStatus
+                - Linux_OperatingSystem_TotalVirtualMemorySize
+                - Linux_EthernetPort_EnabledState
+                - Linux_EthernetPort_Status
+                - Linux_ComputerSystem_EnabledState
+                - CIM_FileSystem_EnabledState
+                - CIM_FileSystem_ReadOnly
+                - CIM_FileSystem_Status
+                - CIM_FileSystem_PercentageSpaceUsed
+
+        additional_tags:
+                CIM_FileSystem: ElementName
+                Desktone_HypervisorManagerStatus: HostAddress
+                Linux_EthernetPort: Name
+                Desktone_ActiveDirectoryStatus: DcAddress
+
+
+

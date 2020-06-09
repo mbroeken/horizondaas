@@ -1,0 +1,150 @@
+#!/usr/bin/env python
+
+# Horizon DaaS monitoring integration
+# Fetching data from the Horizon platform, outputs metrics in Influx Line Protocol on stdout
+
+# Originally written by unknown, ported from Zabbix to Pamola/Influx by Andreas Skoglund (asj@basefarm.com)
+# Rewritten for Horizon DaaS by Terje Nomeland (tjnome@basefarm.com)
+# Created: Fri 15 Nov 11:51:22 CET 2019
+
+# Help:
+# ./pamola_horizondaas --help
+# Typical usage:
+# ./pamola_horizondaas -c config.yml
+
+import logging
+import os
+import re
+import sys
+import traceback
+
+import pywbem
+import yaml
+
+from datetime import datetime
+from optparse import OptionParser
+from influxdb import line_protocol
+
+# Global variable
+options = []
+
+
+def my_excepthook(exctype, excvalue, traceback):
+    logger.exception("Logging an uncaught exception", exc_info=(exctype, excvalue, traceback))
+
+
+def get_hostname_from_url(url):
+    url = re.sub(r'^http[s]?:\/\/', '', url)
+    url = re.sub(r'(:[0-9]+(\/?)$|\/$)', '', url)
+    logger.debug('Hostname from url: ' + url)
+    return url
+
+
+def main():
+    # Metrics
+    metrics = []
+    # Date in UTC
+    data_end_time = datetime.utcnow()
+
+    # device_url contains a list of devices
+    device_url = config['host']['url']
+    device = get_hostname_from_url(device_url)
+    device_login = config['host']['username']
+    device_password = config['host']['password']
+    device_insecure = config['host']['insecure_skip_verify']
+
+    conn = pywbem.WBEMConnection(device_url, (device_login, device_password), no_verification=device_insecure)
+    logger.info("Connecting to " + device_url + " with user: " + device_login)
+
+    # Load CIMs
+    CIMproviders = config['metrics']['CIMs']
+
+    # Get what metrics are allowed from CIMs
+    allowedMetrics = config['metrics']['allowedMetrics']
+
+    additional_tags = {}
+
+    for CIMprovider in CIMproviders:
+        logger.debug('Processing CIM provider ' + CIMprovider + ':')
+        measurement = (config['main']['prefix'] + "-%s" % CIMprovider)
+        try:
+            names = conn.EnumerateInstanceNames(CIMprovider)
+            for n in names:
+                os = conn.GetInstance(n)
+                for key, value in os.items():
+                    if CIMprovider in config['metrics']['additional_tags']:
+                        additional_tags = {config['metrics']['additional_tags'][CIMprovider]: os.__getitem__(
+                            config['metrics']['additional_tags'][CIMprovider])}
+
+                    if CIMprovider + '_' + key in allowedMetrics:
+                        tags = {"targethost": device}
+                        tags.update(additional_tags)
+
+                        if isinstance(value, list):
+                            value = value[0]
+
+                        # Bug fix as return repr(value) will return repr of the CIM type and not the float value.
+                        if isinstance(value, float):
+                            value = float(value)
+
+                        if value == '':
+                            continue
+
+                        fields = {key: value}
+                        metrics.append(
+                            {
+                                "tags": tags,
+                                "points": [
+                                    {
+                                        "measurement": measurement,
+                                        "fields": fields,
+                                        "time": data_end_time
+                                    }
+                                ]
+                            }
+                        )
+
+        except (OSError, NameError, TypeError, pywbem.Error):
+            logger.exception('Error with CIM provider %s\n' % CIMprovider)
+
+    for line in metrics:
+        line = line_protocol.make_lines(line, None)
+        logger.debug(line.lower())
+        print(line.lower())
+
+
+if __name__ == '__main__':
+    parser = OptionParser(
+        description="VMware CIM CLI Horizon tool to be used with Pamola. Doc: "
+                    "https://int.basefarm.com/display/systems/Horizon+DaaS")
+
+    parser.add_option("-c", "--config", dest="horizon_config", help="path to config file",
+                      metavar="horizon_config")
+    (options, args) = parser.parse_args()
+
+    # Setup config
+    with open(options.horizon_config) as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Setup Logs
+    logger = logging.getLogger()
+    logger.setLevel(config['log']['loglevel'])
+
+    logger_formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
+
+    logger_file = logging.FileHandler(config['log']['logfile'])
+    logger_file.setLevel(config['log']['loglevel'])
+    logger_file.setFormatter(logger_formatter)
+
+    logger.addHandler(logger_file)
+
+    # Just to make sure we have correct log level for pywbem
+    logging.getLogger("pywbem").setLevel(int(config['log']['loglevel']))
+
+    logger = logging.getLogger("main")
+    logger.info('Logging and config initialized')
+
+    # Catch all Traceback to logfile
+    sys.excepthook = my_excepthook
+
+    main()
