@@ -55,7 +55,7 @@ main:
 ```
 log:
         loglevel: 30
-        logfile: /var/log/horizondaas/bf-s-daas-sp01.mgmt.basefarm.net.log
+        logfile: /var/log/horizondaas/daas-sp01.mgmt.local.log
 
 ```
 
