@@ -2,15 +2,12 @@
 
 # Horizon DaaS monitoring integration
 # Fetching data from the Horizon platform, outputs metrics in Influx Line Protocol on stdout
-
-# Originally written by unknown, ported from Zabbix to Pamola/Influx by Andreas Skoglund (asj@basefarm.com)
-# Rewritten for Horizon DaaS by Terje Nomeland (tjnome@basefarm.com)
 # Created: Fri 15 Nov 11:51:22 CET 2019
 
 # Help:
-# ./pamola_horizondaas --help
+# ./horizondaas --help
 # Typical usage:
-# ./pamola_horizondaas -c config.yml
+# ./horizondaas -c config.yml
 
 import logging
 import os
