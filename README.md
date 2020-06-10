@@ -30,14 +30,14 @@ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 sudo apt install python3-pip
 # Step 3: Use pip to install virtualenv
 sudo pip3 install virtualenv
-# Step 4: Launch your Python 3 virtual environment, here the name of my virtual environment will be env3
+# Step 4: Launch your Python 3 virtual environment, here the name of my virtual environment will be venv
 virtualenv -p python3 venv
 # Step 5: Activate your new Python 3 environment. There are two ways to do this
 . venv/bin/activate
 # or source venv/bin/activate which does exactly the same thing
 # you can make sure you are now working with Python 3
 python --version
-# this command will show you what is going on: the python executable you are using is now located inside your virtualenv repository which python. in this case Python 3.6.9.
+# this command will show you what is going on: the python executable you are using is now located inside your virtualenv repository which python.
 
 # now we are ready to install some required pip modules
 sudo pip install pywbem
