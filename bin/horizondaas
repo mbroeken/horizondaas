@@ -112,8 +112,7 @@ def main():
 
 if __name__ == '__main__':
     parser = OptionParser(
-        description="VMware CIM CLI Horizon tool to be used with Pamola. Doc: "
-                    "https://int.basefarm.com/display/systems/Horizon+DaaS")
+        description="VMware CIM CLI Horizon DaaS tool to be used with Telegraf.")
 
     parser.add_option("-c", "--config", dest="horizon_config", help="path to config file",
                       metavar="horizon_config")
